@@ -1,6 +1,5 @@
-// signOut(req, res): 로그아웃
 import { OAuth2Client } from "google-auth-library";
-import { findUser } from "../models/users.model";
+import { findUser, makeUser } from "../models/users.model";
 
 const client = new OAuth2Client();
 
@@ -14,17 +13,47 @@ async function verifyIdToken(credential, clientId) {
     const payload = ticket.getPayload();
     return payload;
   } catch (error) {
-    return res.status(401).send({ error: error.message });
+    return res.status(401).json({ error: "Not authenticated" });
   }
 }
 
-// signIn(req, res): 회원가입, 로그인
-async function signIn(req, res) {
+// signin(req, res): 로그인
+export async function signin(req, res) {
   const { credential, clientId } = req.body;
   const payload = verifyIdToken(credential, clientId);
-  const existingUser = await findUser(payload.email);
+  const user = await findUser(payload.email);
 
-  let user;
-  if (!existingUser) {
+  if (user) {
+    req.session.userId = user.id;
+    return res.json({
+      ok: true,
+      data: { name: user.name, email: user.email, deadtime: user.deadtime },
+    });
+  } else {
+    return res.json({ ok: false, message: "Need Signup" });
   }
+}
+
+// signup(req, res): 회원가입
+export async function signup(req, res) {
+  const { credential, clientId, name, deadtime } = req.body;
+  const payload = verifyIdToken(credential, clientId);
+  const email = payload.email;
+  try {
+    makeUser = await makeUser(name, email, deadtime);
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: "Signup failed" });
+  }
+}
+
+// signout(req, res): 로그아웃
+export async function signout(req, res) {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ ok: false, error: "Signout failed" });
+    }
+    res.clearCookie("connect.sid"); // 기본 세션 쿠키 이름
+    res.json({ message: "Signed out" });
+  });
 }
