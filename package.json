@@ -1,0 +1,22 @@
+{
+  "name": "routinemonter-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@prisma/client": "^5.21.1",
+    "nodemon": "^3.1.4",
+    "prisma": "^5.21.1"
+  },
+  "dependencies": {
+    "express": "^4.21.1",
+    "google-auth-library": "^9.14.2"
+  }
+}
