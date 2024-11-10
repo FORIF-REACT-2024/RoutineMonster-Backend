@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
-import { findUser, makeUser } from "../models/users.model";
+import { findUserM, makeUserM } from "../models/users.model.js";
 
 const client = new OAuth2Client();
 
@@ -21,7 +21,7 @@ async function verifyIdToken(credential, clientId) {
 export async function signin(req, res) {
   const { credential, clientId } = req.body;
   const payload = verifyIdToken(credential, clientId);
-  const user = await findUser(payload.email);
+  const user = await findUserM(payload.email);
 
   if (user) {
     req.session.userId = user.id;
@@ -40,7 +40,7 @@ export async function signup(req, res) {
   const payload = verifyIdToken(credential, clientId);
   const email = payload.email;
   try {
-    makeUser = await makeUser(name, email, deadtime);
+    makeUser = await makeUserM(name, email, deadtime);
     return res.json({ ok: true });
   } catch (error) {
     return res.status(500).json({ ok: false, error: "Signup failed" });

@@ -1,7 +1,7 @@
 import express from "express";
-import { signin, signup, signout } from "../controllers/users.controllers";
+import { signin, signup, signout } from "../controllers/users.controllers.js";
 
-const usersRouter = express.Router();
+export const usersRouter = express.Router();
 
 usersRouter.post("/signin", signin);
 usersRouter.post("/signup", signup);

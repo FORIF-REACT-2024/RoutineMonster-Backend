@@ -19,6 +19,7 @@ model User {
   email String
   deadtime Int
   routineLists RoutineList[]
+  calendar Calendar[]
 }
 
 model RoutineList {
@@ -44,6 +45,10 @@ model RoutineCheck {
 }
 
 model Calendar {
-  date DateTime @id 
+  date DateTime 
+  user User @relation(fields: [userId], references: [id])
+  userId Int @unique
   comment String?
+
+  @@id([date, userId])
 }

@@ -1,12 +1,12 @@
 import express from "express";
-import authMiddleware from "../middlewares/session";
+import { authMiddleware } from "../middlewares/session.js";
 import {
   getRoutine,
   makeRoutine,
   deleteRoutine,
-} from "../controllers/routine.controllers";
+} from "../controllers/routine.controllers.js";
 
-const routineRouter = new express.Router();
+export const routineRouter = new express.Router();
 
 routineRouter.get("/", authMiddleware, getRoutine);
 routineRouter.post("/write", authMiddleware, makeRoutine);
