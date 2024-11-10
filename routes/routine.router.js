@@ -10,4 +10,4 @@ const routineRouter = new express.Router();
 
 routineRouter.get("/", authMiddleware, getRoutine);
 routineRouter.post("/write", authMiddleware, makeRoutine);
-routineRouter.delete("/delete", authMiddleware, deleteRoutine);
+routineRouter.post("/delete", authMiddleware, deleteRoutine);

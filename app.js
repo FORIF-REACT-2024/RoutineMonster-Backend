@@ -3,6 +3,7 @@ import session from "express-session";
 
 import usersRouter from "./routes/users.router";
 import routineRouter from "./routes/routine.router";
+import todayRouter from "./routes/today.router";
 
 const PORT = 4000;
 const app = express();
@@ -26,6 +27,7 @@ app.use(
 app.use(express.json());
 app.use("/api/users", usersRouter);
 app.use("/api/routine", routineRouter);
+app.use("/api/today", todayRouter);
 
 app.listen(PORT, () => {
   console.log(`Running on port ${PORT}`);
