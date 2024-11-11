@@ -5,7 +5,7 @@ import { usersRouter } from "./routes/users.router.js";
 import { routineRouter } from "./routes/routine.router.js";
 import { dateRouter } from "./routes/date.router.js";
 
-const PORT = 4000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.get("/", (req, res) => {
