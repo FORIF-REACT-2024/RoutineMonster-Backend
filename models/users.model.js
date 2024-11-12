@@ -4,22 +4,21 @@ const prisma = new PrismaClient();
 
 // 유저 정보 찾기
 export async function findUserM(email) {
-  const findUser = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       email: email,
     },
   });
-  return findUser;
+  return user;
 }
 
 // 유저 정보 생성 (회원가입)
-export async function makeUserM(name, email, deadtime) {
-  const makeUser = await prisma.user.create({
+export async function makeUserM(name, email) {
+  const user = await prisma.user.create({
     data: {
       name: name,
       email: email,
-      deadtime: deadtime,
     },
   });
-  return makeUser;
+  return user;
 }

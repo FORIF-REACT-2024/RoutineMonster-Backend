@@ -17,33 +17,43 @@ async function verifyIdToken(credential, clientId) {
   }
 }
 
-// signin(req, res): 로그인
+// signin(req, res): 로그인, 회원가입
 export async function signin(req, res) {
-  const { credential, clientId } = req.body;
-  const payload = verifyIdToken(credential, clientId);
-  const user = await findUserM(payload.email);
-
-  if (user) {
-    req.session.userId = user.id;
-    return res.json({
-      ok: true,
-      data: { name: user.name, email: user.email, deadtime: user.deadtime },
-    });
-  } else {
-    return res.json({ ok: false, message: "Need Signup" });
-  }
-}
-
-// signup(req, res): 회원가입
-export async function signup(req, res) {
-  const { credential, clientId, name, deadtime } = req.body;
-  const payload = verifyIdToken(credential, clientId);
-  const email = payload.email;
   try {
-    makeUser = await makeUserM(name, email, deadtime);
-    return res.json({ ok: true });
+    const { credential, clientId } = req.body;
+
+    if (!credential || !clientId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "ID token is required" });
+    }
+
+    const payload = verifyIdToken(credential, clientId);
+    const { name, email } = payload;
+
+    if (!name || !email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name and email are required" });
+    }
+
+    let user = await findUserM(email);
+
+    if (!user) {
+      user = makeUserM(name, email);
+    }
+
+    req.session.userId = user.id;
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: { name: user.name, email: user.email },
+    });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: "Signup failed" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Error during signin" });
   }
 }
 
@@ -51,9 +61,11 @@ export async function signup(req, res) {
 export async function signout(req, res) {
   req.session.destroy((err) => {
     if (err) {
-      return res.status(500).json({ ok: false, error: "Signout failed" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Error during signout" });
     }
     res.clearCookie("connect.sid"); // 기본 세션 쿠키 이름
-    res.json({ message: "Signed out" });
+    res.status(200).json({ success: true, message: "Signed out successful" });
   });
 }
