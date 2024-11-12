@@ -147,3 +147,41 @@ export async function updateCommentM(userId, date, comment) {
     create: { date: date, userId: userId, comment: comment },
   });
 }
+
+export async function getCalendarM(userId, year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const responsePromises = [];
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month - 1, day); // 각 날짜를 생성
+    date.setHours(0, 0, 0, 0); // 자정으로 설정
+
+    const dayPromises = prisma.routineCheck.findMany({
+      where: {
+        date: date,
+        userId: userId,
+        completed: true,
+      },
+      select: {
+        routine: {
+          select: {
+            title: true,
+            category: true,
+          },
+        },
+      },
+    });
+    const dayRoutine = {
+      date: date.toISOString().split("T")[0],
+      completed: dayPromises.map((dayPromise) => {
+        dayPromise.routine;
+      }),
+    };
+
+    responsePromises.push(dayRoutine);
+  }
+
+  const response = await Promise.all(responsePromises);
+
+  return response;
+}

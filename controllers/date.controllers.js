@@ -2,6 +2,7 @@ import {
   getDateRoutineM,
   checkRoutineM,
   updateCommentM,
+  getCalendarM,
 } from "../models/date.model.js";
 
 // 일별 루틴 조회
@@ -56,4 +57,20 @@ export async function updateComment(req, res) {
 }
 
 // 전체 캘린더 루틴 가져오기
-export async function getCalendar(req, res) {}
+export async function getCalendar(req, res) {
+  try {
+    const userId = req.session.userId;
+    const { year, month } = req.body;
+    const calendar = await getCalendarM(userId, year, month);
+    return res.status(200).json({
+      success: true,
+      message: "Got calendar data successful",
+      data: calendar,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get calendar data",
+    });
+  }
+}
