@@ -19,14 +19,15 @@ model User {
   email String
   deadtime Int
   routineLists RoutineList[]
+  routinCheck RoutineCheck[]
   calendar Calendar[]
 }
 
 model RoutineList {
   id Int @id @default(autoincrement())
   title String
-  state String
   category String
+  state String
   startDate DateTime
   endDate DateTime
   times Int
@@ -35,13 +36,16 @@ model RoutineList {
   userId Int
   routineCheck RoutineCheck[]
 }
+
 model RoutineCheck {
   routineLists RoutineList @relation(fields: [routineId], references: [id])
   routineId Int
   date DateTime
-  completed Boolean
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  completed Boolean @default(false)
 
-  @@id([routineId, date])
+  @@id([routineId, date, userId])
 }
 
 model Calendar {

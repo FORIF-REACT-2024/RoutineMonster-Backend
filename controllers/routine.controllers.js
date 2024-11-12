@@ -4,42 +4,53 @@ import {
   deleteRoutineM,
 } from "../models/routine.model.js";
 
-// 전체 루틴 가져오기
+// 전체 루틴 목록 조회
 export async function getRoutine(req, res) {
   try {
-    const routines = await getRoutineM(req.session.userId);
-    return res.status(200).json(routines);
+    const userId = req.session.userId;
+    const routines = await getRoutineM(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Get routines successful.",
+      data: routines,
+    });
   } catch (error) {
-    return res.status(500).json("Cannot find routines");
+    return res
+      .status(500)
+      .json({ success: false, message: "Cannot find routines" });
   }
 }
 
-// 루틴 작성하기
+// 루틴 작성
 export async function makeRoutine(req, res) {
-  const { title, category, startData, endDate, times } = req.body;
   try {
-    const making = await makeRoutineM(
-      req.session.userId,
-      title,
-      category,
-      startData,
-      endDate,
-      times
-    );
-    return res.status(200).json("Success making routine");
+    const userId = req.session.userId;
+    const { title, category, startDate, endDate, times } = req.body;
+
+    await makeRoutineM(userId, title, category, startDate, endDate, times);
+    return res
+      .status(200)
+      .json({ success: true, message: "Make routine successful" });
   } catch (error) {
-    return res.status(500).json("Failed to create a routine");
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to create a routine" });
   }
 }
 
-// 루틴 삭제하기
+// 루틴 삭제
 export async function deleteRoutine(req, res) {
-  const routineId = req.body.routineId;
   try {
-    const response = await deleteRoutineM(routineId);
-    const deletedRoutine = await getDeletedRoutineM(routineId);
-    return res.status(200).json(deletedRoutine);
+    const userId = req.session.userId;
+    const routineId = req.body.routineId;
+    await deleteRoutineM(userId, routineId);
+    return res
+      .status(200)
+      .json({ success: true, message: "Delete routine successful" });
   } catch (error) {
-    return res.status(500).json("Cannot delete routines");
+    return res
+      .status(500)
+      .json({ success: true, message: "Failed to delete a routine" });
   }
 }
