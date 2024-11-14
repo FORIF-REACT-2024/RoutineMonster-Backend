@@ -13,7 +13,7 @@ async function verifyIdToken(credential, clientId) {
     const payload = ticket.getPayload();
     return payload;
   } catch (error) {
-    return res.status(401).json({ error: "Not authenticated" });
+    console.error("Token verification error:", error);
   }
 }
 
