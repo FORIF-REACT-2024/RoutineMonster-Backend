@@ -31,6 +31,11 @@ export async function signin(req, res) {
     }
 
     const payload = verifyIdToken(credential, clientId);
+    if (!payload) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
+    }
     const { name, email } = payload;
 
     if (!name || !email) {
