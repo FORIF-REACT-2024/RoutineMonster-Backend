@@ -16,8 +16,7 @@ datasource db {
 model User {
   id Int @id @default(autoincrement())
   name String
-  email String
-  deadtime Int
+  email String @unique
   routineLists RoutineList[]
   routinCheck RoutineCheck[]
   calendar Calendar[]

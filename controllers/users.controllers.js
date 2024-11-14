@@ -1,10 +1,11 @@
 import { OAuth2Client } from "google-auth-library";
 import { findUserM, makeUserM } from "../models/users.model.js";
 
-const client = new OAuth2Client();
+const clientId = process.env.CLIENT_ID;
+const client = new OAuth2Client(clientId);
 
 // idToken 검증
-async function verifyIdToken(credential, clientId) {
+async function verifyIdToken(credential) {
   try {
     const ticket = await client.verifyIdToken({
       idToken: credential,
@@ -20,9 +21,7 @@ async function verifyIdToken(credential, clientId) {
 // signin(req, res): 로그인, 회원가입
 export async function signin(req, res) {
   try {
-    console.log("Request body:", req.body);
-
-    const { credential, clientId } = req.body;
+    const { credential } = req.body;
 
     if (!credential || !clientId) {
       return res
@@ -30,24 +29,23 @@ export async function signin(req, res) {
         .json({ success: false, message: "ID token is required" });
     }
 
-    const payload = verifyIdToken(credential, clientId);
+    const payload = await verifyIdToken(credential);
     if (!payload) {
       return res
         .status(401)
         .json({ success: false, message: "Not authenticated" });
     }
-    const { name, email } = payload;
+    const { email, name } = payload;
 
     if (!name || !email) {
       return res
         .status(400)
         .json({ success: false, message: "Name and email are required" });
     }
-
     let user = await findUserM(email);
 
     if (!user) {
-      user = makeUserM(name, email);
+      user = await makeUserM(name, email);
     }
 
     req.session.userId = user.id;

@@ -9,7 +9,10 @@ export async function findUserM(email) {
       email: email,
     },
   });
-  return user;
+  if (user) {
+    return user;
+  }
+  return null;
 }
 
 // 유저 정보 생성 (회원가입)
