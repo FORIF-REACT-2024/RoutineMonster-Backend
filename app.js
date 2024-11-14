@@ -9,7 +9,7 @@ import { dateRouter } from "./routes/date.router.js";
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-app.use(cors({ origin: "http://127.0.0.1:5174" }));
+app.use(cors({ origin: "http://localhost:5173" }));
 
 app.get("/", (req, res) => {
   res.send("Routine Monster API");
