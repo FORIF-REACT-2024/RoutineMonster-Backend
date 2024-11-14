@@ -20,6 +20,8 @@ async function verifyIdToken(credential, clientId) {
 // signin(req, res): 로그인, 회원가입
 export async function signin(req, res) {
   try {
+    console.log("Request body:", req.body);
+
     const { credential, clientId } = req.body;
 
     if (!credential || !clientId) {
