@@ -74,3 +74,20 @@ export async function signout(req, res) {
     res.status(200).json({ success: true, message: "Signed out successful" });
   });
 }
+
+// session(req, res): 세션 정보 확인
+export async function session(req, res) {
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ success: false, message: "No active session" });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Session active",
+    data: {
+      userId: req.session.userId,
+    },
+  });
+}

@@ -62,13 +62,13 @@ export async function makeRoutineM(
 
   const makeRoutine = await prisma.routineList.create({
     data: {
-      title: title,
-      category: category,
-      state: state,
-      startDate: startDate,
-      endDate: endDate,
-      time: times,
-      userId: userId,
+      title,
+      category,
+      state,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      times,
+      userId,
     },
   });
 

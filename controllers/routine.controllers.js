@@ -25,10 +25,31 @@ export async function getRoutine(req, res) {
 // 루틴 작성
 export async function makeRoutine(req, res) {
   try {
-    const userId = req.session.userId;
+    const userId = req.session?.userId; // 세션이 없을 경우를 대비한 안전한 접근
+    if (!userId) {
+      console.error("Unauthorized: userId is missing in session");
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
     const { title, category, startDate, endDate, times } = req.body;
 
-    await makeRoutineM(userId, title, category, startDate, endDate, times);
+    if (!title || !category || !startDate || !endDate || !times) {
+      console.error("Invalid input data:", req.body);
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid input data" });
+    }
+
+    // 디버깅: 요청 데이터 로그
+    console.log("Received data:", {
+      title,
+      category,
+      startDate,
+      endDate,
+      times,
+      userId,
+    });
+
+    await makeRoutineM(title, category, startDate, endDate, times, userId);
     return res
       .status(200)
       .json({ success: true, message: "Make routine successful" });
