@@ -12,13 +12,11 @@ const app = express();
 app.use(
   cors({
     origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
-
-app.get("/", (req, res) => {
-  res.send("Routine Monster API");
-});
+app.options("*", cors()); // 모든 경로에 대해 OPTIONS 메서드를 처리
 
 app.use(
   session({
@@ -27,13 +25,19 @@ app.use(
     saveUninitialized: false, // 초기화되지 않은 세션을 저장할지 여부
     cookie: {
       httpOnly: true, // 자바스크립트 접근 방지
-      secure: process.env.NODE_ENV === "production", // HTTPS에서만 작동
+      secure: false, // HTTPS에서만 작동
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000, // 1일 동안 유효
     },
   })
 );
+
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Routine Monster API");
+});
+
 app.use("/api/users", usersRouter);
 app.use("/api/routine", routineRouter);
 app.use("/api/date", dateRouter);

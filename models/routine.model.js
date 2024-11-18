@@ -11,9 +11,10 @@ export async function getRoutineM(userId) {
     const routines = await prisma.routineList.findMany({
       where: {
         user: { id: userId },
-        states: state,
+        state: state,
       },
       select: {
+        id: true,
         category: true,
         title: true,
         startDate: true,
@@ -23,6 +24,7 @@ export async function getRoutineM(userId) {
       },
     });
     const objectives = routines.map((routine) => ({
+      id: routine.id,
       category: routine.category,
       title: routine.title,
       startDate: routine.startDate,
