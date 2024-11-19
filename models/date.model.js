@@ -183,39 +183,56 @@ export async function updateCommentM(userId, date, comment) {
 
 // < getCalendarM - 전체 캘린더 루틴 조회 >
 export async function getCalendarM(userId, year, month) {
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const responsePromises = [];
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getDate();
+  const response = [];
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month - 1, day); // 각 날짜를 생성
+    const date = new Date(Date.UTC(year, month - 1, day)); // 각 날짜를 생성
     date.setHours(0, 0, 0, 0); // 자정으로 설정
 
-    const dayPromises = prisma.routineCheck.findMany({
-      where: {
-        date: date,
-        userId: userId,
-        completed: true,
-      },
-      select: {
-        routine: {
-          select: {
-            title: true,
-            category: true,
+    try {
+      // 특정 날짜의 RoutineCheck 데이터 조회
+      const dayRoutines = await prisma.routineCheck.findMany({
+        where: {
+          date: {
+            gte: date, // 시작 시간 (UTC 기준)
+            lt: new Date(Date.UTC(year, month - 1, day + 1)), // 다음 날 00:00 (UTC 기준)
+          },
+          userId: userId,
+          completed: true,
+        },
+        include: {
+          routineLists: {
+            select: {
+              title: true,
+              category: true,
+            },
           },
         },
-      },
-    });
-    const dayRoutine = {
-      date: date.toISOString().split("T")[0],
-      completed: dayPromises.map((dayPromise) => {
-        dayPromise.routine;
-      }),
-    };
+      });
 
-    responsePromises.push(dayRoutine);
+      if (dayRoutines && dayRoutines.length > 0) {
+        // 루틴 데이터 변환
+        const completedRoutines = dayRoutines.map((routine) => ({
+          title: routine.routineLists.title,
+          category: routine.routineLists.category,
+        }));
+
+        const localDate = new Date(
+          date.getTime() - date.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split("T")[0];
+
+        // 응답 데이터에 추가
+        response.push({
+          date: localDate, // ISO 형식의 날짜 (YYYY-MM-DD)
+          completed: completedRoutines, // 완료된 루틴 데이터 추가
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching routines for date:", date, error);
+    }
   }
-
-  const response = await Promise.all(responsePromises);
-
   return response;
 }

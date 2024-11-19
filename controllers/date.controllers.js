@@ -56,13 +56,11 @@ export async function updateComment(req, res) {
       .status(200)
       .json({ success: true, message: "Updated comment successful" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update comment",
-        error: error,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update comment",
+      error: error,
+    });
   }
 }
 
@@ -70,8 +68,12 @@ export async function updateComment(req, res) {
 export async function getCalendar(req, res) {
   try {
     const userId = req.session.userId;
-    const { year, month } = req.body;
-    const calendar = await getCalendarM(userId, year, month);
+    const { year, month } = req.query;
+    const calendar = await getCalendarM(
+      userId,
+      parseInt(year),
+      parseInt(month)
+    );
     return res.status(200).json({
       success: true,
       message: "Got calendar data successful",
@@ -81,6 +83,7 @@ export async function getCalendar(req, res) {
     return res.status(500).json({
       success: false,
       message: "Failed to get calendar data",
+      error: error,
     });
   }
 }
