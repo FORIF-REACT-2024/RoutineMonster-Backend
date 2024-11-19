@@ -9,7 +9,7 @@ import {
 export async function getDateRoutine(req, res) {
   try {
     const userId = req.session.userId;
-    const date = req.body.date;
+    const date = req.query.date;
     const dateRoutines = await getDateRoutineM(userId, date);
 
     return res.status(200).json({
@@ -28,15 +28,21 @@ export async function getDateRoutine(req, res) {
 export async function checkRoutine(req, res) {
   try {
     const userId = req.session.userId;
-    const { date, checkedRoutineId } = req.body;
-    await checkRoutineM(checkedRoutineId, date, userId);
+    const { date, checkedRoutineIds } = req.body;
+
+    console.log("userId:", userId);
+    console.log("date:", date);
+    console.log("checkedRoutineIds:", checkedRoutineIds);
+    await checkRoutineM(checkedRoutineIds, date, userId);
     res
       .status(200)
       .json({ success: true, message: "Checked routines successful" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to check routines" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to check routines",
+      error: error,
+    });
   }
 }
 
@@ -52,7 +58,11 @@ export async function updateComment(req, res) {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: "Failed to update comment" });
+      .json({
+        success: false,
+        message: "Failed to update comment",
+        error: error,
+      });
   }
 }
 
