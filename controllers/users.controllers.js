@@ -58,17 +58,21 @@ export async function signin(req, res) {
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, message: "Error during signin" });
+      .json({ success: false, message: "Error during signin", error: error });
   }
 }
 
 // signout(req, res): 로그아웃
 export async function signout(req, res) {
-  req.session.destroy((err) => {
-    if (err) {
+  req.session.destroy((error) => {
+    if (error) {
       return res
         .status(500)
-        .json({ success: false, message: "Error during signout" });
+        .json({
+          success: false,
+          message: "Error during signout",
+          error: error,
+        });
     }
     res.clearCookie("connect.sid"); // 기본 세션 쿠키 이름
     res.status(200).json({ success: true, message: "Signed out successful" });

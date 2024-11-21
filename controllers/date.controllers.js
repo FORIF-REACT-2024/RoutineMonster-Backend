@@ -20,7 +20,11 @@ export async function getDateRoutine(req, res) {
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, message: "Failed to get routines of date" });
+      .json({
+        success: false,
+        message: "Failed to get routines of date",
+        error: error,
+      });
   }
 }
 

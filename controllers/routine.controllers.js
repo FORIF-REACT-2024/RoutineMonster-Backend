@@ -8,7 +8,17 @@ import {
 export async function getRoutine(req, res) {
   try {
     const userId = req.session.userId;
-    const routines = await getRoutineM(userId);
+    const { pageId } = req.params;
+    const parsedPageId = parseInt(pageId, 10);
+
+    if (isNaN(parsedPageId) || parsedPageId < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pageId. Must be a positive number.",
+      });
+    }
+
+    const routines = await getRoutineM(userId, parsedPageId);
 
     return res.status(200).json({
       success: true,
@@ -18,7 +28,7 @@ export async function getRoutine(req, res) {
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, message: "Cannot find routines" });
+      .json({ success: false, message: "Cannot find routines", error: error });
   }
 }
 
@@ -33,30 +43,21 @@ export async function makeRoutine(req, res) {
     const { title, category, startDate, endDate, times } = req.body;
 
     if (!title || !category || !startDate || !endDate || !times) {
-      console.error("Invalid input data:", req.body);
       return res
         .status(400)
         .json({ success: false, message: "Invalid input data" });
     }
-
-    // 디버깅: 요청 데이터 로그
-    console.log("Received data:", {
-      title,
-      category,
-      startDate,
-      endDate,
-      times,
-      userId,
-    });
 
     await makeRoutineM(title, category, startDate, endDate, times, userId);
     return res
       .status(200)
       .json({ success: true, message: "Make routine successful" });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to create a routine" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create a routine",
+      error: error,
+    });
   }
 }
 
@@ -64,14 +65,34 @@ export async function makeRoutine(req, res) {
 export async function deleteRoutine(req, res) {
   try {
     const userId = req.session.userId;
-    const routineId = req.body.routineId;
-    await deleteRoutineM(userId, routineId);
-    return res
-      .status(200)
-      .json({ success: true, message: "Delete routine successful" });
+    const { routineId } = req.body;
+
+    if (!routineId) {
+      return res.status(400).json({
+        success: false,
+        message: "Routine ID is required",
+      });
+    }
+
+    const result = await deleteRoutineM(userId, routineId);
+
+    // 삭제 결과 확인
+    if (result.deletedRoutine && result.deletedChecks) {
+      return res.status(200).json({
+        success: true,
+        message: "Delete routine successful",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "Routine not found or not deleted",
+      });
+    }
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: true, message: "Failed to delete a routine" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete a routine",
+      error: error,
+    });
   }
 }

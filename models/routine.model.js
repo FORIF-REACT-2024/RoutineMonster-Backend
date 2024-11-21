@@ -3,42 +3,36 @@ import { Prisma, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // < getRoutineM - 전체 루틴 목록 조회 >
-export async function getRoutineM(userId) {
-  const states = ["expected", "ongoing", "completed"];
-  const response = { routinelist: [] };
-
-  const statePromises = states.map(async (state) => {
-    const routines = await prisma.routineList.findMany({
-      where: {
-        user: { id: userId },
-        state: state,
-      },
-      select: {
-        id: true,
-        category: true,
-        title: true,
-        startDate: true,
-        endDate: true,
-        times: true,
-        completedTimes: true,
-      },
-    });
-    const objectives = routines.map((routine) => ({
-      id: routine.id,
-      category: routine.category,
-      title: routine.title,
-      startDate: routine.startDate,
-      endDate: routine.endDate,
-      times: routine.times,
-      completedTimes: routine.completedTimes,
-    }));
-
-    response.routinelist.push({ state: state, objective: objectives });
+export async function getRoutineM(userId, pageId, itemsPerPage = 8) {
+  const routines = await prisma.routineList.findMany({
+    where: {
+      user: { id: userId },
+    },
+    select: {
+      id: true,
+      category: true,
+      title: true,
+      startDate: true,
+      endDate: true,
+      times: true,
+      completedTimes: true,
+    },
+    skip: (pageId - 1) * itemsPerPage,
+    take: itemsPerPage,
   });
 
-  await Promise.all(statePromises);
+  const totalCount = await prisma.routineList.count({
+    where: {
+      userId: userId,
+    },
+  });
 
-  return response;
+  return {
+    routineList: routines,
+    totalCount: totalCount,
+    currentPage: pageId,
+    totalPages: Math.ceil(totalCount / itemsPerPage),
+  };
 }
 
 // < makeRoutineM - 루틴 작성 >
@@ -104,16 +98,20 @@ export async function makeRoutineM(
 
 // < deleteRoutineM - 루틴 삭제 >
 export async function deleteRoutineM(userId, routineId) {
-  // routineList에서 삭제
-  await prisma.routineList.deleteMany({
-    where: { id: routineId, userId: userId },
-  });
-
   // routineCheck에서 삭제
-  await prisma.routineCheck.deleteMany({
+  const deletedChecks = await prisma.routineCheck.deleteMany({
     where: {
       routineId: routineId,
       userId: userId,
     },
   });
+  // routineList에서 삭제
+  const deletedRoutine = await prisma.routineList.deleteMany({
+    where: { id: routineId, userId: userId },
+  });
+
+  return {
+    deletedRoutine: deletedRoutine.count > 0, // 삭제된 루틴의 개수 확인
+    deletedChecks: deletedChecks.count > 0, // 삭제된 체크 항목의 개수 확인
+  };
 }
