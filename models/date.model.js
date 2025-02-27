@@ -42,7 +42,7 @@ export async function getDateRoutineM(userId, date) {
       });
 
       return {
-        id: routine.routineId,
+        id: dateRoutine.routineId,
         title: routine.title,
         category: routine.category,
         startDate: routine.startDate,
